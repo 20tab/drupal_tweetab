@@ -1,0 +1,7 @@
+name = Drupal Tweetab
+description = Put twitter on your website with drupal-tweetab! 
+core = 7.x
+files[] = drupal_tweetab.module
+files[] = drupal_tweetab.install
+version = "0.1"
+configure = admin/config/content/drupal_tweetab

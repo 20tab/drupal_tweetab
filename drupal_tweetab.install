@@ -1,0 +1,55 @@
+<?php
+function drupal_tweetab_schema() {
+	$schema = array();
+		
+	$schema['drupal_tweetab'] = array(
+		'description' => t('Drupal Tweetab table'),
+		'fields' => array(
+			'id' => array(
+        		'description' => 'The primary identifier for a tweetab.',
+        		'type' => 'serial',
+        		'unsigned' => TRUE,
+        		'not null' => TRUE
+			),
+      		'username' => array(
+				'description' => t('Username to follow'),
+				'type' => 'varchar',
+				'length' => 255,
+				'not null' => true,
+		  	),
+		  	'avatar_size' => array(
+				'description' => t('Avatar size'),
+				'type' => 'int',
+				'unsigned' => TRUE,
+		        'not null' => TRUE,
+		        'default' => 0
+		  	),
+		  	'count' => array(
+				'description' => t('Number of tweets'),
+				'type' => 'int',
+				'unsigned' => TRUE,
+		        'not null' => TRUE,
+		        'default' => 0
+		  	),
+		),
+		'primary key' => array('id'),
+	);         
+		        
+	return $schema;
+
+}
+
+function drupal_tweetab_install() {
+  	drupal_tweetab_schema('drupal_tweetab');
+	$tid = db_insert('drupal_tweetab')
+  		->fields(array('username' => 'username',
+					   'count' => 3,
+					   'avatar_size' => 32))
+  		->execute();
+}
+
+function drupal_tweetab_uninstall() {
+ 	drupal_uninstall_schema('drupal_tweetab');
+}
+
+?>

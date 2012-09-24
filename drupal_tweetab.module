@@ -1,0 +1,109 @@
+<?php
+/**************************************
+ * drupal_tweetab
+***************************************/
+
+drupal_add_css(drupal_get_path('module', 'drupal_tweetab') . '/jquery.tweet.css');
+drupal_add_js(drupal_get_path('module', 'drupal_tweetab') . '/jquery-1.7.1.min.js');
+drupal_add_js(drupal_get_path('module', 'drupal_tweetab') . '/jquery.tweet.js');
+drupal_add_js(drupal_get_path('module', 'drupal_tweetab') . '/drupal_tweetab.js');
+/**
+ * Implements hook_block_info().
+ */
+function drupal_tweetab_block_info() {
+	$blocks['drupal_tweetab'] = array(
+		'info' => t('Drupal tweetab'), //The name that will appear in the block list.
+    	'cache' => DRUPAL_CACHE_PER_ROLE, //Default
+  	);
+  	return $blocks;
+}
+
+function get_record(){
+	$query = db_select('drupal_tweetab','s')
+		          ->fields('s', array('id','username','avatar_size','count'))
+				  ->range(0,1)
+				  ->orderBy('id', 'DESC');
+ 	$result = $query->execute();
+ 	$obj = $result->fetchObject();
+	return $obj;
+}
+
+function drupal_tweetab_form($form, &$form_state) {
+ 	$obj = get_record();
+ 	$form['drupal_tweetab_username'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Username'),
+	    '#size' => 40,
+	    '#maxlength' => 255,
+	    '#description' => t('Username to folllow'),
+	    '#required' => TRUE,
+	    '#default_value' => $obj->username,
+	);
+	$form['drupal_tweetab_avatar_size'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Avatar size'),
+	    '#size' => 40,
+	    '#maxlength' => 255,
+	    '#description' => t('The size of avatar'),
+	    '#required' => TRUE,
+	    '#default_value' => $obj->avatar_size,
+	);
+	$form['drupal_tweetab_count'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Count'),
+	    '#size' => 40,
+	    '#maxlength' => 255,
+	    '#description' => t('Number of tweet to show'),
+	    '#required' => TRUE,
+	    '#default_value' => $obj->count,
+	);
+	
+
+  	return system_settings_form($form);
+}
+
+
+function drupal_tweetab_form_validate($form, &$form_state){
+	$obj = get_record();
+	$username = $form_state['values']['drupal_tweetab_username'];
+  	$avatar_size = $form_state['values']['drupal_tweetab_avatar_size'];
+  	$count = $form_state['values']['drupal_tweetab_count'];
+  	
+  	$tid = db_update('drupal_tweetab')
+  		->fields(array('username' => $username,
+					   'avatar_size' => $avatar_size,
+					   'count' => $count))
+		->condition('id',$obj->id)
+  		->execute();	
+}
+
+function drupal_tweetab_menu() {
+	$items = array();
+	$items['admin/config/content/drupal_tweetab'] = array(
+	    'title' => 'Drupal Tweetab',
+	    'description' => 'Configuration for Drupal Tweetab',
+	    'page callback' => 'drupal_get_form',
+	    'page arguments' => array('drupal_tweetab_form'),
+	    'access arguments' => array('access administration pages'),
+	    'type' => MENU_NORMAL_ITEM,
+	);
+ 
+ 	return $items;
+}
+
+function drupal_tweetab_block_view($delta){
+ 	$block = array();
+
+  	switch ($delta) {
+    	case 'drupal_tweetab':
+			$obj = get_record();
+		 	$html = '<div class="tweet" data-username="'.$obj->username.'" data-avatar_size="'.$obj->avatar_size.'" data-count="'.$obj->count.'"></div>';
+	      	$block['subject'] = t('Drupal Tweetab');
+	      	$block['content'] = $html;
+	}
+  	return $block;
+	
+}
+
+
+?>
